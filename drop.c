@@ -1,5 +1,5 @@
 //go:build ignore
-/* XDP and TC eBPF programs to drop packets on port 8080 */
+/* XDP and TC eBPF programs to drop UDP packets on port 8080 */
 #include <linux/types.h>
 #include <linux/bpf.h>
 #include <bpf/bpf_endian.h>
@@ -15,11 +15,11 @@ int xdp_drop_port_8080(struct xdp_md *ctx) {
 	void *data_end = (void *)(unsigned long long)ctx->data_end;
 	void *data = (void *)(unsigned long long)ctx->data;
 	int ip_type;
-	int tcp_type;
+	int udp_type;
 	struct hdr_cursor nh;
 	struct iphdr *ip;
 	struct ipv6hdr *ipv6;
-	struct tcphdr *tcp;
+	struct udphdr *udp;
 	nh.pos = data;
 
 	// Parse Ethernet and IP headers
@@ -40,14 +40,14 @@ int xdp_drop_port_8080(struct xdp_md *ctx) {
 	}
  
 	// Parse TCP header
-	tcp_type = parse_tcphdr(&nh, data_end, &tcp);
-	if ((void*)(tcp + 1) > data_end) {
+	udp_type = parse_udphdr(&nh, data_end, &udp);
+	if ((void*)(udp + 1) > data_end) {
 		return XDP_PASS;
 	}
 
 	// Drop all packets on port 8080
-  	if (bpf_ntohs(tcp->dest) == DROP_PORT) {
-		bpf_printk("Dropping packets on TCP port 8080 using XDP!");
+  	if (bpf_ntohs(udp->dest) == DROP_PORT) {
+		bpf_printk("Dropping UDP packets on port 8080 using XDP!");
 		return XDP_DROP;
 	}
 
@@ -59,11 +59,11 @@ int tc_drop_port_8080(struct __sk_buff *ctx) {
 	void *data_end = (void *)(unsigned long long)ctx->data_end;
 	void *data = (void *)(unsigned long long)ctx->data;
 	int ip_type;
-	int tcp_type;
+	int udp_type;
 	struct hdr_cursor nh;
 	struct iphdr *ip;
 	struct ipv6hdr *ipv6;
-	struct tcphdr *tcp;
+	struct udphdr *udp;
 	nh.pos = data;
 
 	// Parse Ethernet and IP headers
@@ -78,8 +78,8 @@ int tc_drop_port_8080(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
-	// If not TCP Protocol -> TC_ACT_OK 
-	if (ip_type != IPPROTO_TCP) {
+	// If not UDP Protocol -> TC_ACT_OK 
+	if (ip_type != IPPROTO_UDP) {
 		return TC_ACT_OK;
 	}
 
@@ -87,13 +87,13 @@ int tc_drop_port_8080(struct __sk_buff *ctx) {
 		return TC_ACT_OK;
 	}
 
-	tcp_type = parse_tcphdr(&nh, data_end, &tcp);
-	if ((void*)(tcp + 1) > data_end) {
+	udp_type = parse_udphdr(&nh, data_end, &udp);
+	if ((void*)(udp + 1) > data_end) {
 		return TC_ACT_OK;
 	}
 
-	if (bpf_ntohs(tcp->dest) == DROP_PORT) {
-		bpf_printk("Dropping packets on TCP port 8080 using TC!");
+	if (bpf_ntohs(udp->dest) == DROP_PORT) {
+		bpf_printk("Dropping UDP packets on port 8080 using TC!");
 		return TC_ACT_SHOT;
 	}
 
