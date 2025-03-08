@@ -47,6 +47,7 @@ int xdp_drop_port_8080(struct xdp_md *ctx) {
 
 	// Drop all packets on port 8080
   	if (bpf_ntohs(tcp->dest) == DROP_PORT) {
+		bpf_printk("Dropping packets on TCP port 8080 using XDP!");
 		return XDP_DROP;
 	}
 
@@ -92,6 +93,7 @@ int tc_drop_port_8080(struct __sk_buff *ctx) {
 	}
 
 	if (bpf_ntohs(tcp->dest) == DROP_PORT) {
+		bpf_printk("Dropping packets on TCP port 8080 using TC!");
 		return TC_ACT_SHOT;
 	}
 

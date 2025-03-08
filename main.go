@@ -9,6 +9,7 @@ import (
 	"net"
 	"flag"
 
+	"github.com/cilium/ebpf" // NOTE: Uncomment for TC Hook
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/rlimit"
 )
@@ -36,6 +37,7 @@ func main() {
 	}
 
 	// Attach XDP program to the network interface.
+	/*
 	xdplink, err := link.AttachXDP(link.XDPOptions{
 				Program:   objs.XdpDropPort8080,
 				Interface: iface.Index,
@@ -44,21 +46,21 @@ func main() {
 		log.Fatal("Attaching XDP:", err)
 	}
 	defer xdplink.Close()
+	fmt.Println("XDP program successfully attached. Press Enter to exit.")
+	*/
 
 	// Attach TC Program to the network interface.
-	/*
 	tclink, err := link.AttachTCX(link.TCXOptions{
-		Program:   objs.TcEgress,
-		Attach:		 ebpf.AttachTCXIngress,
-		Interface: iface.Index,
+				Program:   objs.TcDropPort8080,
+				Attach:	   ebpf.AttachTCXIngress,
+				Interface: iface.Index,
 	})
 	if err != nil {
 			log.Fatal("Attaching TC:", err)
 	}
 	defer tclink.Close()
-	*/
+	fmt.Println("TC program successfully attached. Press Enter to exit.")
 
-	fmt.Println("XDP and TC programs successfully attached. Press Enter to exit.")
 	fmt.Scanln()
 
 	time.Sleep(time.Second * 30)
