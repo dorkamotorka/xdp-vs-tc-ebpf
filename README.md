@@ -17,3 +17,8 @@ Run eBPF program:
 sudo ./drop [-i] [net-interface]
 ```
 **NOTE**: Find the network interface to attach to using `ìp a`. By default it attaches to `lo` (localhost).
+
+Send Network traffic using:
+```
+sudo hping3 -S -p 8080 <IP> -c 10000 --flood
+```

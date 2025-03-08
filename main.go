@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 	"net"
 	"flag"
 
@@ -41,6 +40,7 @@ func main() {
 	xdplink, err := link.AttachXDP(link.XDPOptions{
 				Program:   objs.XdpDropPort8080,
 				Interface: iface.Index,
+				//Flags: link.XDPDriverMode,
 	})
 	if err != nil {
 		log.Fatal("Attaching XDP:", err)
@@ -62,6 +62,4 @@ func main() {
 	fmt.Println("TC program successfully attached. Press Enter to exit.")
 
 	fmt.Scanln()
-
-	time.Sleep(time.Second * 30)
 }
