@@ -34,8 +34,8 @@ int xdp_drop_port_8080(struct xdp_md *ctx) {
 		return XDP_PASS;
 	}
 
-	// If not TCP Protocol -> XDP_PASS
-	if (ip_type != IPPROTO_TCP) {
+	// If not UDP Protocol -> XDP_PASS
+	if (ip_type != IPPROTO_UDP) {
 		return XDP_PASS;
 	}
  
@@ -75,20 +75,24 @@ int tc_drop_port_8080(struct __sk_buff *ctx) {
 		ip_type = parse_ip6hdr(&nh, data_end, &ipv6);
 	} else {
 		// Default action, pass it up the GNU/Linux network stack to be handled
+		//bpf_printk("Unable to determine IP type");
 		return TC_ACT_OK;
 	}
 
 	// If not UDP Protocol -> TC_ACT_OK 
 	if (ip_type != IPPROTO_UDP) {
+		//bpf_printk("here1");
 		return TC_ACT_OK;
 	}
 
 	if ((void*)(ip + 1) > data_end) {
+		//bpf_printk("here2");
 		return TC_ACT_OK;
 	}
 
 	udp_type = parse_udphdr(&nh, data_end, &udp);
 	if ((void*)(udp + 1) > data_end) {
+		//bpf_printk("here3");
 		return TC_ACT_OK;
 	}
 

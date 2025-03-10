@@ -14,7 +14,7 @@ curl -fLJ https://github.com/Netflix/bpftop/releases/latest/download/bpftop-x86_
 
 Run eBPF program:
 ```
-sudo ./drop [-i] [net-interface]
+sudo ./drop [-i net-interface]
 ```
 **NOTE**: Find the network interface to attach to using `ìp a`. By default it attaches to `lo` (localhost).
 
